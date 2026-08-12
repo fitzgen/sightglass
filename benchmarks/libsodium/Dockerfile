@@ -2,16 +2,33 @@
 FROM ubuntu:22.04
 RUN apt update && apt install -y wget xz-utils unzip git
 
-# Download and extract the latest stable version of Zig and retrieve the
-# `stable` branch of libsodium that can be built by it.
+# Download Zig and retrieve a pinned commit of libsodium that can be built by it.
+ARG ZIG_VERSION=0.12.0
 WORKDIR /
-RUN wget https://ziglang.org/download/0.12.0/zig-linux-x86_64-0.12.0.tar.xz
-RUN tar --extract --verbose --file=zig-linux-x86_64-0.12.0.tar.xz
-ENV PATH="${PATH}:/zig-linux-x86_64-0.12.0"
+# Download Zig for the host architecture and normalize the install path to `/zig` so that the rest
+# of this file does not have to know the version or architecture.
+RUN ARCH=$(uname -m); \
+    case "$ARCH" in \
+    x86_64) ZIG_ARCH=x86_64 ;; \
+    aarch64 | arm64) ZIG_ARCH=aarch64 ;; \
+    *) echo "Unsupported architecture: $ARCH" >&2; exit 1 ;; \
+    esac; \
+    TARBALL=zig-linux-${ZIG_ARCH}-${ZIG_VERSION}.tar.xz; \
+    wget https://ziglang.org/download/${ZIG_VERSION}/$TARBALL; \
+    tar --extract --verbose --file=$TARBALL; \
+    mv zig-linux-${ZIG_ARCH}-${ZIG_VERSION} /zig
+ENV PATH="${PATH}:/zig"
 RUN echo "zig version = $(zig version)"
-RUN wget https://github.com/jedisct1/libsodium/releases/download/1.0.20-RELEASE/libsodium-1.0.20.tar.gz
-RUN tar -xzf libsodium-1.0.20.tar.gz
-RUN mv /libsodium-1.0.20 /libsodium
+# Fetch libsodium at a pinned commit -- the `1.0.20-RELEASE` tag as of this writing. Pin by commit
+# hash rather than by tag or release tarball, both of which upstream can replace in place. This
+# directory produces one benchmark per file in `test/default/`, so a test that upstream renames or
+# deletes would otherwise silently change which `.wasm` files this build emits; with a hash, that
+# can only happen when we deliberately bump `LIBSODIUM_COMMIT` here.
+ARG LIBSODIUM_COMMIT=9511c982fb1d046470a8b42aa36556cdb7da15de
+RUN git init /libsodium \
+    && git -C /libsodium remote add origin https://github.com/jedisct1/libsodium \
+    && git -C /libsodium fetch --depth 1 origin ${LIBSODIUM_COMMIT} \
+    && git -C /libsodium checkout --detach ${LIBSODIUM_COMMIT}
 
 # Build the benchmarks. Note how we patch the self-timing code with calls to the
 # Sightglass `bench_start()` and `bench_end()` functions. Also note that each
