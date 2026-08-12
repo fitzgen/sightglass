@@ -1,27 +1,38 @@
 # This two-phase Dockerfile allows us to avoid re-downloading APT packages and
 # wasi-sdk with every build.
-ARG WASI_SDK_VERSION=20
+ARG WASI_SDK_VERSION=28
 
 # First, retrieve wasi-sdk:
-FROM ubuntu:22.04 AS builder
+FROM ubuntu:24.04 AS builder
 ARG WASI_SDK_VERSION
 WORKDIR /
 RUN apt update && apt install -y wget
-RUN wget https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-$WASI_SDK_VERSION/wasi-sdk-$WASI_SDK_VERSION.0-linux.tar.gz
-RUN tar xvf wasi-sdk-${WASI_SDK_VERSION}.0-linux.tar.gz
+
+# Download and extract wasi-sdk for the host architecture, then normalize the install path to
+# `/wasi-sdk` so that the stage below does not have to know the version or architecture.
+RUN ARCH=$(uname -m); \
+    case "$ARCH" in \
+    x86_64) WASI_ARCH=x86_64 ;; \
+    aarch64 | arm64) WASI_ARCH=arm64 ;; \
+    *) echo "Unsupported architecture: $ARCH" >&2; exit 1 ;; \
+    esac; \
+    TARBALL=wasi-sdk-${WASI_SDK_VERSION}.0-${WASI_ARCH}-linux.tar.gz; \
+    wget https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-${WASI_SDK_VERSION}/$TARBALL; \
+    tar xvf $TARBALL; \
+    mv wasi-sdk-${WASI_SDK_VERSION}.0-${WASI_ARCH}-linux /wasi-sdk
 
 # Second, compile the benchmark to Wasm.
-FROM ubuntu:22.04
-ARG WASI_SDK_VERSION
-COPY --from=builder /wasi-sdk-${WASI_SDK_VERSION}.0 /wasi-sdk-${WASI_SDK_VERSION}.0/
+FROM ubuntu:24.04
+WORKDIR /
+COPY --from=builder /wasi-sdk /wasi-sdk/
 
 # Set common env vars.
-ENV CC=/wasi-sdk-${WASI_SDK_VERSION}.0/bin/clang
-ENV CXX=/wasi-sdk-${WASI_SDK_VERSION}.0/bin/clang++
-ENV LD=/wasi-sdk-${WASI_SDK_VERSION}.0/bin/lld
-ENV CFLAGS=--sysroot=/wasi-sdk-${WASI_SDK_VERSION}.0/share/wasi-sysroot
-ENV CXXFLAGS=--sysroot=/wasi-sdk-${WASI_SDK_VERSION}.0/share/wasi-sysroot
-ENV PATH=$PATH:/wasi-sdk-${WASI_SDK_VERSION}.0
+ENV CC=/wasi-sdk/bin/clang
+ENV CXX=/wasi-sdk/bin/clang++
+ENV LD=/wasi-sdk/bin/lld
+ENV CFLAGS=--sysroot=/wasi-sdk/share/wasi-sysroot
+ENV CXXFLAGS=--sysroot=/wasi-sdk/share/wasi-sysroot
+ENV PATH=$PATH:/wasi-sdk
 
 # Copy in the `src` directory.
 ENV SRC=/usr/src/shootout
