@@ -1,4 +1,5 @@
 use crate::keys::KeyBuilder;
+use crate::sum_totals::SUM_TOTAL;
 use anyhow::Result;
 use sightglass_data::{Measurement, Summary};
 use termcolor::WriteColor;
@@ -112,8 +113,8 @@ pub fn write(mut summaries: Vec<Summary<'_>>, output_file: &mut dyn WriteColor) 
     // Our "Sum Total" results always come first, then we sort by phase,
     // benchmark, event, and finally engine.
     summaries.sort_by(|x, y| {
-        (y.wasm == "Sum Total")
-            .cmp(&(x.wasm == "Sum Total"))
+        (y.wasm == SUM_TOTAL)
+            .cmp(&(x.wasm == SUM_TOTAL))
             .then_with(|| x.phase.cmp(&y.phase))
             .then_with(|| x.wasm.cmp(&y.wasm))
             .then_with(|| x.event.cmp(&y.event))

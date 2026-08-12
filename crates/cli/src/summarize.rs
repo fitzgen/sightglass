@@ -1,6 +1,6 @@
 use anyhow::Result;
 use clap::Parser;
-use sightglass_analysis::summarize;
+use sightglass_analysis::{sum_totals, summarize};
 use sightglass_data::Format;
 use std::{
     fs::File,
@@ -29,7 +29,7 @@ pub struct SummarizeCommand {
 
 impl SummarizeCommand {
     pub fn execute(&self) -> Result<()> {
-        let measurements = if let Some(files) = self.input_file.as_ref() {
+        let mut measurements = if let Some(files) = self.input_file.as_ref() {
             let mut ms = Vec::new();
             for file in files {
                 let reader = BufReader::new(File::open(file)?);
@@ -39,6 +39,8 @@ impl SummarizeCommand {
         } else {
             self.input_format.read(io::stdin())?
         };
+
+        sum_totals::add(&mut measurements);
 
         let summaries = summarize::calculate(&measurements);
         if let Some(output_format) = &self.output_format {

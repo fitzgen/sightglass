@@ -1,6 +1,6 @@
 use anyhow::Result;
 use clap::Parser;
-use sightglass_analysis::{effect_size, summarize};
+use sightglass_analysis::{effect_size, sum_totals, summarize};
 use sightglass_data::Format;
 use std::{
     fs::File,
@@ -9,6 +9,9 @@ use std::{
 
 /// Calculate the effect size (and associated confidence interval) between the
 /// results for two different engines.
+///
+/// In addition to the per-benchmark comparisons, a synthetic "Sum Total"
+/// benchmark is compared, summing each sample's counts across all benchmarks.
 #[derive(Debug, Parser)]
 #[command(name = "effect-size")]
 pub struct EffectSizeCommand {
@@ -33,7 +36,7 @@ pub struct EffectSizeCommand {
 
 impl EffectSizeCommand {
     pub fn execute(&self) -> Result<()> {
-        let measurements = if let Some(files) = self.input_file.as_ref() {
+        let mut measurements = if let Some(files) = self.input_file.as_ref() {
             let mut ms = Vec::new();
             for file in files {
                 let reader = BufReader::new(File::open(file)?);
@@ -43,6 +46,8 @@ impl EffectSizeCommand {
         } else {
             self.input_format.read(io::stdin())?
         };
+
+        sum_totals::add(&mut measurements);
 
         let effects = effect_size::calculate(self.significance_level, &measurements)?;
         if let Some(output_format) = &self.output_format {

@@ -361,15 +361,18 @@ fn benchmark_common_and_per_engine_flags() {
 }
 
 /// With multiple benchmarks and non-raw (summary) output, a "Sum Total" row is
-/// added that sums each sample's counts across the benchmarks. Using a single
-/// process makes the per-sample sums span both benchmarks.
+/// added that sums each sample's counts across the benchmarks.
+///
+/// Every benchmark is measured in its own subprocesses, so the totals have to
+/// sum samples that come from different processes; see
+/// `effect_size_sum_total_sums_across_benchmarks` for the arithmetic.
 #[test]
 fn benchmark_sum_total() {
     sightglass_cli_benchmark()
         .arg("--processes")
-        .arg("1")
-        .arg("--iterations-per-process")
         .arg("2")
+        .arg("--iterations-per-process")
+        .arg("1")
         .arg("--")
         .arg(benchmark("noop"))
         .arg(benchmark("pulldown-cmark"))
