@@ -4,13 +4,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define LENGTH 17000
+/* Fallback for `./shootout-sieve.length.input`, tuned so that this benchmark
+   executes ~100M Wasm instructions. */
+#define LENGTH 283
 
 int main()
 {
     static char flags[8192 + 1];
     unsigned long res;
-    int n = LENGTH;
+    int n = (int) bench_read_long("./shootout-sieve.length.input", LENGTH);
     long i, k;
     int count;
 

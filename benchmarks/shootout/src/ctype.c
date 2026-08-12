@@ -6,7 +6,9 @@
 #include <string.h>
 
 #define STR_SIZE 50000
-#define ITERATIONS 1000
+/* Fallback for `./shootout-ctype.iterations.input`, tuned so that this benchmark
+   executes ~100M Wasm instructions. */
+#define ITERATIONS 20
 
 int main()
 {
@@ -21,9 +23,10 @@ int main()
     memset(str, 'x', str_size);
     str[str_size - 1U] = 0;
 
-    printf("[ctype] running with str_size = %zu for %d iterations\n", str_size, ITERATIONS);
+    int iterations = (int) bench_read_long("./shootout-ctype.iterations.input", ITERATIONS);
+    printf("[ctype] running with str_size = %zu for %d iterations\n", str_size, iterations);
     bench_start();
-    for (i = 0; i < ITERATIONS; i++)
+    for (i = 0; i < iterations; i++)
     {
         BLACK_BOX(str);
         for (j = 0U; j < str_size; j++)

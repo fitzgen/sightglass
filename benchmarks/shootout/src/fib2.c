@@ -13,7 +13,8 @@ fib2(unsigned long n)
 
 int main()
 {
-    int n = 42;
+    /* The fallback is tuned so that this benchmark executes ~100M Wasm instructions. */
+    int n = (int) bench_read_long("./shootout-fib2.n.input", 32);
     printf("[fib2] finding fibonacci number of: %d\n", n);
 
     bench_start();

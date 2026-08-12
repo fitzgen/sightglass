@@ -4,7 +4,9 @@
 #include <stdlib.h>
 
 #define LENGTH 10000
-#define ITERATIONS 1000
+/* Fallback for `./shootout-heapsort.iterations.input`, tuned so that this benchmark
+   executes ~100M Wasm instructions. */
+#define ITERATIONS 14
 
 #define IM 139968
 #define IA 3877
@@ -62,9 +64,10 @@ int main()
     double* ary = calloc(n + 1, sizeof(double));
     double res;
 
+    int iterations = (int) bench_read_long("./shootout-heapsort.iterations.input", ITERATIONS);
     bench_start();
     int i, j;
-    for (i = 0; i < ITERATIONS; i++) {
+    for (i = 0; i < iterations; i++) {
         BLACK_BOX(ary);
         BLACK_BOX(n);
         for (j = 1; j <= n; j++) {

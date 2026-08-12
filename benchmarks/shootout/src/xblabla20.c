@@ -6,7 +6,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define ITERATIONS 1000
+/* Fallback for `./shootout-xblabla20.iterations.input`, tuned so that this benchmark
+   executes ~100M Wasm instructions. */
+#define ITERATIONS 5170
 #define BUF_SIZE 1000
 
 #define ROTL64(x, b) (uint64_t)(((x) << (b)) | ((x) >> (64 - (b))))
@@ -215,9 +217,10 @@ int main()
     BLACK_BOX(buf);
     assert(BUF_SIZE >= xblabla20_KEYBYTES && BUF_SIZE >= xblabla20_NONCEBYTES);
 
+    int iterations = (int) bench_read_long("./shootout-xblabla20.iterations.input", ITERATIONS);
     bench_start();
     int i;
-    for (i = 0; i < ITERATIONS; i++)
+    for (i = 0; i < iterations; i++)
     {
         xblabla20_xor(buf, buf, BUF_SIZE, buf, buf);
     }

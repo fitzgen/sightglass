@@ -18,32 +18,26 @@ int ackermann(int M, int N)
     return ackermann(M - 1, ackermann(M, (N - 1)));
 }
 
-int read_int_from_file(char* path) {
-    char* buf [32] = { 0 };
-
-    int fd = open(path, O_RDONLY);
-    assert(fd != -1);
-
-    size_t m = 0, n = 0;
-    do {
-        m = read(fd, (void*) &buf, sizeof(buf) - n - 1);
-        assert(m >= 0);
-        n += m;
-    } while (m > 0);
-    assert(close(fd) == 0);
-
-    buf[n] = '\0';
-    return atoi(&buf);
-}
-
 int main()
 {
-    int M = read_int_from_file("./shootout-ackermann.m.input");
-    int N = read_int_from_file("./shootout-ackermann.n.input");
+    int M = (int)bench_read_long("./shootout-ackermann.m.input", 3);
+    int N = (int)bench_read_long("./shootout-ackermann.n.input", 7);
+    /* `A(3, n)` grows by ~4x with each step of `n`, so no single `(M, N)` lands near the ~100M
+       instruction target; repeat the call instead. */
+    int repeat = (int) bench_read_long("./shootout-ackermann.repeat.input", 11);
     printf("[ackermann] running with M = %d and N = %d\n", M, N);
 
+    int result = 0;
+    int i;
     bench_start();
-    int result = ackermann(M, N);
+    for (i = 0; i < repeat; i++)
+    {
+        /* Keep the compiler from hoisting this pure call out of the loop. */
+        BLACK_BOX(M);
+        BLACK_BOX(N);
+        result = ackermann(M, N);
+        BLACK_BOX(result);
+    }
     bench_end();
 
     printf("[ackermann] returned %d\n", result);

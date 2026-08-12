@@ -6,7 +6,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define ITERATIONS 1000
+/* Fallback for `./shootout-xchacha20.iterations.input`, tuned so that this benchmark
+   executes ~100M Wasm instructions. */
+#define ITERATIONS 3115
 #define BUF_SIZE 1000
 
 #define ROTL32(x, b) (uint32_t)(((x) << (b)) | ((x) >> (32 - (b))))
@@ -201,9 +203,10 @@ int main()
     BLACK_BOX(buf);
     assert(BUF_SIZE >= xchacha20_KEYBYTES && BUF_SIZE >= xchacha20_NONCEBYTES);
 
+    int iterations = (int) bench_read_long("./shootout-xchacha20.iterations.input", ITERATIONS);
     bench_start();
     int i;
-    for (i = 0; i < ITERATIONS; i++)
+    for (i = 0; i < iterations; i++)
     {
         xchacha20_xor(buf, buf, BUF_SIZE, buf, buf);
     }

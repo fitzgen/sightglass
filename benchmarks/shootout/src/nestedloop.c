@@ -3,13 +3,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define LENGTH 30
+/* Fallback for `./shootout-nestedloop.length.input`, tuned so that this benchmark
+   executes ~100M Wasm instructions. */
+#define LENGTH 15
 
 int main()
 {
-    int n = LENGTH;
+    int n = (int) bench_read_long("./shootout-nestedloop.length.input", LENGTH);
     BLACK_BOX(n);
-    int a, b, c, d, e, f, x = 0;
+    int a, b, c, d, e, f;
+    /* `x` is `volatile` so that the increment is a real load/store: otherwise the compiler
+       closes the whole loop nest into a single multiply and the benchmark measures nothing. */
+    volatile int x = 0;
     BLACK_BOX(x);
 
     printf("[nestedloop] running 6 nested loops with %d iterations each\n", n);

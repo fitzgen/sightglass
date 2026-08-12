@@ -1,7 +1,9 @@
 #include <sightglass.h>
 #include <stdint.h>
 
-#define ITERATIONS 10000
+/* Fallback for `./shootout-gimli.iterations.input`, tuned so that this benchmark
+   executes ~100M Wasm instructions. */
+#define ITERATIONS 22000
 #define gimli_BLOCKBYTES 48
 #define ROTL32(x, b) (uint32_t)(((x) << (b)) | ((x) >> (32 - (b))))
 
@@ -50,9 +52,10 @@ int main()
     uint32_t state[gimli_BLOCKBYTES / 4] = { 0 };
     BLACK_BOX(state);
 
+    int iterations = (int) bench_read_long("./shootout-gimli.iterations.input", ITERATIONS);
     bench_start();
     int i;
-    for (i = 0; i < ITERATIONS; i++) {
+    for (i = 0; i < iterations; i++) {
         gimli_core(state);
     }
     bench_end();

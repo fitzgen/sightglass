@@ -3,7 +3,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define ITERATIONS 300000
+/* Fallback for `./shootout-matrix.iterations.input`, tuned so that this benchmark
+   executes ~100M Wasm instructions. */
+#define ITERATIONS 15975
 #define SIZE 10
 
 static int**
@@ -60,10 +62,11 @@ int main()
     assert(m1 != NULL && m2 != NULL && mm != NULL);
 
     // BENCHMARK
-    printf("[matrix] running matrix multiplication on %d rows, %d columns for %d iterations\n", rows, cols, ITERATIONS);
+    int iterations = (int) bench_read_long("./shootout-matrix.iterations.input", ITERATIONS);
+    printf("[matrix] running matrix multiplication on %d rows, %d columns for %d iterations\n", rows, cols, iterations);
     bench_start();
     int i;
-    for (i = 0; i < ITERATIONS; i++) {
+    for (i = 0; i < iterations; i++) {
         mm = mmult(rows, cols, m1, m2, mm);
     }
     int res = mm[0][0] + mm[2][3] + mm[3][2] + mm[4][4];

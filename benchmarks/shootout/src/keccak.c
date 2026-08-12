@@ -2,6 +2,8 @@
 #include <sightglass.h>
 #include <stdint.h>
 
+/* Fallback for `./shootout-keccak.iterations.input`, tuned so that this benchmark
+   executes ~100M Wasm instructions. */
 #define ITERATIONS 10000
 #define keccak_BLOCKBYTES 200
 #define ROTL64(x, b) (uint32_t)(((x) << (b)) | ((x) >> (64 - (b))))
@@ -2217,9 +2219,10 @@ int main()
     uint64_t state[keccak_BLOCKBYTES / 8] = { 0 };
     BLACK_BOX(state);
 
+    int iterations = (int) bench_read_long("./shootout-keccak.iterations.input", ITERATIONS);
     bench_start();
     int i;
-    for (i = 0; i < ITERATIONS; i++) {
+    for (i = 0; i < iterations; i++) {
         keccak_core(state);
     }
     bench_end();

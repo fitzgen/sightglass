@@ -6,7 +6,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define ITERATIONS 10000
+/* Fallback for `./shootout-base64.iterations.input`, tuned so that this benchmark
+   executes ~100M Wasm instructions. */
+#define ITERATIONS 293
 
 #define base64_ENCODED_LEN(BIN_LEN, VARIANT)                                                     \
     (((BIN_LEN) / 3U) * 4U +                                                                     \
@@ -277,10 +279,11 @@ int main()
 
     BLACK_BOX(len);
 
-    printf("[base64] running with len = %zu for %d iterations\n", len, ITERATIONS);
+    int iterations = (int) bench_read_long("./shootout-base64.iterations.input", ITERATIONS);
+    printf("[base64] running with len = %zu for %d iterations\n", len, iterations);
     bench_start();
     int i;
-    for (i = 0; i < ITERATIONS; i++)
+    for (i = 0; i < iterations; i++)
     {
         BLACK_BOX(bin);
         bin2base64(b64, b64_len, bin, len, 1);
