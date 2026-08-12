@@ -26,8 +26,23 @@ modified to:
 - Add `"bench" "start"` and `"bench" "end"` imports for Sightglass timing.
 - Add a `"_start"` export that calls `__wasm_call_ctors`, `bench.start`,
   `wasm_main`, and `bench.end`.
-- Execute the sqlite3 benchmarks with `szTest=25` instead of `szTest=100`,
-  bringing a default run under Sightglass from ~4 minutes to ~1 minute.
+- Execute the sqlite3 benchmarks with `szTest=1` instead of `szTest=100`.
+
+## Instruction count
+
+This benchmark executes ~459M Wasm instructions, which is above the ~100M that
+the rest of the corpus targets (see `benchmarks/README.md`).
+
+`szTest` is the only knob available: the C sources are not in this repository,
+so the size is patched directly in `sqlite3.wat` as the constant
+`i64.const 4294967297` (`= 2^32 + szTest`, sharing a 64-bit store with an
+adjacent field). It is already at its minimum of `1`, which brought the
+benchmark down from ~17.1G instructions at `szTest=25`.
+
+Going lower would require restricting which of speedtest1's test cases run,
+which would change what the benchmark measures, so this is left out of band
+deliberately. It is still well above `scripts/pca.R`'s
+`MIN_DYNAMIC_INST_COUNT`, so it continues to participate in the PCA.
 
 ## License
 
