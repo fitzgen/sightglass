@@ -30,7 +30,10 @@ print_header() {
 # To allow the use of symlinks in the benchmark directories (docker ignores them), we `tar` up the
 # directory and `--dereference` (i.e., follow) all symlinks provided.
 print_header "Create build context"
-TMP_TAR=$(mktemp /tmp/sightglass-benchmark-dir-XXXXXX.tar)
+# Keep the `XXXXXX` at the end of the template: BSD `mktemp` (macOS) only substitutes *trailing*
+# `X`s, so a template like `...-XXXXXX.tar` is returned verbatim, and the next run then dies with
+# `mkstemp failed: File exists`.
+TMP_TAR=$(mktemp /tmp/sightglass-benchmark-dir-XXXXXX)
 # macOS's bsdtar bundles extended attributes (notably `com.apple.provenance`) that a Linux Docker
 # daemon rejects when unpacking the build context (`lsetxattr ... operation not supported`); exclude
 # them. GNU tar (used on CI) omits xattrs by default and lacks `--no-mac-metadata`, so only pass
