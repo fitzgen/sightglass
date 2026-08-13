@@ -1,4 +1,5 @@
 use crate::keys::KeyBuilder;
+use crate::sum_totals::SUM_TOTAL;
 use anyhow::Result;
 use sightglass_data::{EffectSize, Engine, Measurement, Phase, Summary};
 use std::collections::BTreeSet;
@@ -102,8 +103,8 @@ pub fn write(
     // focus on statistically significant results before insignificant results
     // and larger relative effect sizes before smaller relative effect sizes.
     effect_sizes.sort_by(|x, y| {
-        (y.wasm == "Sum Total")
-            .cmp(&(x.wasm == "Sum Total"))
+        (y.wasm == SUM_TOTAL)
+            .cmp(&(x.wasm == SUM_TOTAL))
             .then_with(|| y.is_significant().cmp(&x.is_significant()))
             .then_with(|| {
                 let x_speedup = x.a_speed_up_over_b().0.max(x.b_speed_up_over_a().0);
