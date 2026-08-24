@@ -13475,9 +13475,13 @@ void benchmark()
 
 int main(int, char**)
 {
+    // The iteration count is read from `./default.input` so that the workload can be retuned
+    // without recompiling; the fallback is tuned so that this benchmark executes ~100M Wasm
+    // instructions.
+    unsigned iterations = (unsigned)bench_read_long("./default.input", 33);
     double before = currentTime();
     bench_start();
-    for (unsigned i = 0; i < 100; ++i)
+    for (unsigned i = 0; i < iterations; ++i)
         benchmark();
     bench_end();
     double after = currentTime();

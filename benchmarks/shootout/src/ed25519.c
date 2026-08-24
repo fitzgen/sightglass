@@ -4,7 +4,9 @@
 #include <stdint.h>
 #include <string.h>
 
-#define ITERATIONS 10000
+/* Fallback for `./shootout-ed25519.iterations.input`, tuned so that this benchmark
+   executes ~100M Wasm instructions. */
+#define ITERATIONS 18
 
 #if defined(__SIZEOF_INT128__)
 typedef unsigned __int128 uint128_t;
@@ -998,9 +1000,10 @@ int main()
     unsigned char a[32] = { 0x42 };
     BLACK_BOX(a);
 
+    int iterations = (int) bench_read_long("./shootout-ed25519.iterations.input", ITERATIONS);
     bench_start();
     int i;
-    for (i = 0; i < ITERATIONS; i++) {
+    for (i = 0; i < iterations; i++) {
         BLACK_BOX(p_s);
         ge25519_p3 p;
         ge25519_frombytes(&p, p_s);

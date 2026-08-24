@@ -79,15 +79,12 @@ libsodium/libsodium-secretbox7.wasm
 libsodium/libsodium-secretbox8.wasm
 libsodium/libsodium-secretbox_easy.wasm
 libsodium/libsodium-secretbox_easy2.wasm
-libsodium/libsodium-secretstream.wasm
 libsodium/libsodium-secretstream_xchacha20poly1305.wasm
 libsodium/libsodium-shorthash.wasm
 libsodium/libsodium-sign.wasm
 libsodium/libsodium-siphashx24.wasm
 libsodium/libsodium-sodium_core.wasm
 libsodium/libsodium-sodium_utils.wasm
-libsodium/libsodium-sodium_utils2.wasm
-libsodium/libsodium-sodium_utils3.wasm
 libsodium/libsodium-sodium_version.wasm
 libsodium/libsodium-stream.wasm
 libsodium/libsodium-stream2.wasm

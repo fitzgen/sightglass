@@ -10,7 +10,9 @@
 #define SLOTS_LEN 100000
 #define PERIOD 1000
 #define PEAK 10
-#define ITERATIONS 1000000
+/* Fallback for `./shootout-ratelimit.iterations.input`, tuned so that this benchmark
+   executes ~100M Wasm instructions. */
+#define ITERATIONS 304000
 
 typedef struct RateLimiter_
 {
@@ -145,9 +147,10 @@ int main()
     uint64_t i;
     int hits = 0;
 
+    uint64_t iterations = (uint64_t) bench_read_long("./shootout-ratelimit.iterations.input", ITERATIONS);
     printf("[ratelimit] start limiting\n");
     bench_start();
-    for (i = (uint64_t)0U; i < ITERATIONS; i++)
+    for (i = (uint64_t)0U; i < iterations; i++)
     {
         memcpy(ip, &i, sizeof i);
         BLACK_BOX(ip);

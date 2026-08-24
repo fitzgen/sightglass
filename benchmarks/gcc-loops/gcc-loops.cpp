@@ -346,7 +346,11 @@ int main(int argc,char* argv[]){
 #ifdef SMALL_PROBLEM_SIZE
   const int Mi = 1<<10;
 #else
-  const int Mi = 1<<18;
+  // The problem size is read from `./default.input` so that the workload can be retuned without
+  // recompiling; the fallback is tuned so that this benchmark executes ~100M Wasm instructions.
+  // `Mi` scales all of the kernels below uniformly, and the digests they print depend on it, so
+  // `default.stdout.expected` must be regenerated whenever it changes.
+  const int Mi = (int) bench_read_long("./default.input", 191);
 #endif
   init_memory(&ia[0], &ia[N]);
   init_memory(&ib[0], &ib[N]);

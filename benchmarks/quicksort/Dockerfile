@@ -1,21 +1,33 @@
 # This two-phase Dockerfile allows us to avoid re-downloading APT packages and wasi-sdk with every
 # build.
 
+ARG WASI_SDK_VERSION=28
+
 # First, retrieve wasi-sdk:
 
 FROM ubuntu:24.04 AS builder
+ARG WASI_SDK_VERSION
 WORKDIR /
 RUN apt update && apt install -y wget
 
-# Download and extract wasi-sdk.
-RUN wget https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-28/wasi-sdk-28.0-x86_64-linux.tar.gz
-RUN tar xvf wasi-sdk-28.0-x86_64-linux.tar.gz
+# Download and extract wasi-sdk for the host architecture, then normalize the install path to
+# `/wasi-sdk` so that the stage below does not have to know the version or architecture.
+RUN ARCH=$(uname -m); \
+    case "$ARCH" in \
+    x86_64) WASI_ARCH=x86_64 ;; \
+    aarch64 | arm64) WASI_ARCH=arm64 ;; \
+    *) echo "Unsupported architecture: $ARCH" >&2; exit 1 ;; \
+    esac; \
+    TARBALL=wasi-sdk-${WASI_SDK_VERSION}.0-${WASI_ARCH}-linux.tar.gz; \
+    wget https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-${WASI_SDK_VERSION}/$TARBALL; \
+    tar xvf $TARBALL; \
+    mv wasi-sdk-${WASI_SDK_VERSION}.0-${WASI_ARCH}-linux /wasi-sdk
 
 # Second, compile the benchmark to Wasm.
 
 FROM ubuntu:24.04
 WORKDIR /
-COPY --from=builder /wasi-sdk-28.0-x86_64-linux /wasi-sdk/
+COPY --from=builder /wasi-sdk /wasi-sdk/
 
 # Set common env vars.
 ENV CC=/wasi-sdk/bin/clang

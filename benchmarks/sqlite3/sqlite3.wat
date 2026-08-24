@@ -6404,7 +6404,7 @@
     i32.const 67720
     i32.store
     i32.const 121324
-    i64.const 4294967321
+    i64.const 4294967297
     i64.store align=4
     local.get 0
     i32.const 2

@@ -4,7 +4,9 @@
 #include <string.h>
 
 #define STR_SIZE 10000
-#define ITERATIONS 10
+/* Fallback for `./shootout-memmove.iterations.input`, tuned so that this benchmark
+   executes ~100M Wasm instructions. */
+#define ITERATIONS 250
 
 int main()
 {
@@ -12,10 +14,11 @@ int main()
     char* str = calloc(str_size, (size_t)1U);
     assert(str != NULL);
 
+    int iterations = (int) bench_read_long("./shootout-memmove.iterations.input", ITERATIONS);
     bench_start();
     int i;
     size_t j;
-    for (i = 0; i < ITERATIONS; i++) {
+    for (i = 0; i < iterations; i++) {
         BLACK_BOX(str);
         for (j = (size_t)0U; j < str_size - (size_t)1U; j++) {
             memmove(&str[j], str, str_size - j);

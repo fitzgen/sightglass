@@ -7,7 +7,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define ARENA_SIZE ((size_t)1000000)
+/* Fallback for `./shootout-seqhash.arena-size.input`, tuned so that this benchmark executes ~100M
+   Wasm instructions. Each `hash_try()` call walks the whole arena, so the cost of solving a level
+   is proportional to this. */
+#define ARENA_SIZE ((size_t)1100)
 #define LEVEL_FIRST 1
 #define LEVEL_LAST 5
 #define LEVELS (LEVEL_LAST - LEVEL_FIRST + 1)
@@ -224,7 +227,8 @@ hashseq_solve(HashSeqArena *arena, HashSeqSolution *solutions, const uint32_t su
 
 int main()
 {
-    void *buf = calloc(ARENA_SIZE, (size_t)1U);
+    size_t arena_size = (size_t) bench_read_long("./shootout-seqhash.arena-size.input", ARENA_SIZE);
+    void *buf = calloc(arena_size, (size_t)1U);
     assert(buf != NULL);
     HashSeqArena arena;
     HashSeqSolution solutions[LEVELS];
@@ -234,7 +238,9 @@ int main()
     memcpy(suffix, buf, sizeof suffix);
     BLACK_BOX(suffix);
 
-    hashseq_arena_init(&arena, buf, ARENA_SIZE);
+    if (hashseq_arena_init(&arena, buf, arena_size) != 0) {
+        abort();
+    }
 
     bench_start();
     hashseq_solve(&arena, solutions, suffix, LEVEL_FIRST, LEVEL_LAST, HASH_ITERATIONS);

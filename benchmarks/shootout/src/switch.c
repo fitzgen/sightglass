@@ -6,15 +6,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define ITERATIONS 1000
-#define LENGTH 10000
+/* Fallbacks for `./shootout-switch.iterations.input` and `./shootout-switch.length.input`,
+   tuned so that this benchmark executes ~100M Wasm instructions. */
+#define ITERATIONS 10
+#define LENGTH 3863
 
 int main()
 {
-    size_t length = LENGTH;
+    size_t length = (size_t) bench_read_long("./shootout-switch.length.input", LENGTH);
+    int iterations = (int) bench_read_long("./shootout-switch.iterations.input", ITERATIONS);
 
     uint32_t *x;
-    x = malloc(LENGTH * sizeof *x);
+    x = malloc(length * sizeof *x);
     assert(x != NULL);
 
     size_t i;
@@ -23,10 +26,10 @@ int main()
         x[i] = i;
     }
 
-    printf("[switch] running switch statement for %d iterations on a %zu-byte string\n", ITERATIONS, length);
+    printf("[switch] running switch statement for %d iterations on a %zu-byte string\n", iterations, length);
     bench_start();
     int j;
-    for (j = 0; j < ITERATIONS; j++)
+    for (j = 0; j < iterations; j++)
     {
         BLACK_BOX(x);
         BLACK_BOX(length);

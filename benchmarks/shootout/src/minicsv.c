@@ -5,7 +5,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define ITERATIONS 1000000
+/* Fallback for `./shootout-minicsv.iterations.input`, tuned so that this benchmark
+   executes ~100M Wasm instructions. */
+#define ITERATIONS 15000
 
 #define MINICSV_DELIM ','
 #define MINICSV_QUOTE '"'
@@ -113,8 +115,9 @@ int main()
     size_t cols_count;
     int    i;
 
+    int iterations = (int) bench_read_long("./shootout-minicsv.iterations.input", ITERATIONS);
     bench_start();
-    for (i = 0; i < ITERATIONS; i++) {
+    for (i = 0; i < iterations; i++) {
         char buf[] =
             "first,line,has,\"comas,\"\"escaped\"\" characters\",and,\"multiples\r\nlines\"\r\n"
             "second,line,\"  has  \",,empty,,,,columns\r\nremainder";
