@@ -46,8 +46,10 @@ new libsodium release.
 
 ## Status
 
-45 of the 78 tests are within the 80M-120M band described in [../README.md](../README.md).
-The rest cannot get there with an iteration count as the only lever.
+Six of upstream's 78 tests are deleted rather than tuned, as they compile down
+to empty functions when targeting Wasm, leaving 72. 45 of those are within the
+80M-120M band described in [../README.md](../README.md). The rest cannot get
+there with an iteration count as the only lever.
 
 ### Over the band even at one iteration (27)
 
@@ -70,21 +72,6 @@ integer iteration count that lands in the band.
 | `secretbox_easy2` | 1.18G | `aead_aegis128l` | 136.1M |
 | `stream` | 1.12G | `onetimeauth7` | 131.6M |
 | `stream2` | 1.03G |  |  |
-
-### No measurable work on Wasm (6)
-
-These bodies are empty or near-empty once compiled to Wasm, so no iteration count can
-reach the band. They are left at 1 iteration rather than padded with a loop that would
-measure nothing but loop overhead.
-
-| test | instructions | why |
-| --- | --- | --- |
-| `aead_aes256gcm` | 65 | Guarded by `crypto_aead_aes256gcm_is_available()`, which is false on Wasm. |
-| `aead_aes256gcm2` | 27 | Same AES-NI availability check as `aead_aes256gcm`. |
-| `misuse` | 0 | Its body is `#ifdef HAVE_CATCHABLE_ABRT`, and `build.zig` only defines that for Linux and macOS, so on Wasm the test is just `return 0`. |
-| `onetimeauth2` | 0 | Its only statement is `printf("%d\n", crypto_onetimeauth_verify(...))`, and `cmptest.h` defines `printf(...)` to `do { } while(0)` — so the argument is never evaluated and the verify never runs. |
-| `sodium_core` | 236 | Only runtime CPU feature detection, all false on Wasm. |
-| `sodium_version` | 25 | Only version-string getters. |
 
 ### Not deterministic (7)
 

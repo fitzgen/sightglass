@@ -12,8 +12,6 @@ blake3-simd/benchmark.wasm
 hex-simd/benchmark.wasm
 intgemm-simd/benchmark.wasm
 meshoptimizer/benchmark.wasm
-libsodium/libsodium-aead_aes256gcm.wasm
-libsodium/libsodium-aead_aes256gcm2.wasm
 libsodium/libsodium-aead_chacha20poly1305.wasm
 libsodium/libsodium-aead_chacha20poly13052.wasm
 libsodium/libsodium-aead_xchacha20poly1305.wasm
@@ -51,9 +49,7 @@ libsodium/libsodium-kdf.wasm
 libsodium/libsodium-keygen.wasm
 libsodium/libsodium-kx.wasm
 libsodium/libsodium-metamorphic.wasm
-libsodium/libsodium-misuse.wasm
 libsodium/libsodium-onetimeauth.wasm
-libsodium/libsodium-onetimeauth2.wasm
 libsodium/libsodium-onetimeauth7.wasm
 libsodium/libsodium-pwhash_argon2i.wasm
 libsodium/libsodium-pwhash_argon2id.wasm
@@ -78,9 +74,7 @@ libsodium/libsodium-secretstream_xchacha20poly1305.wasm
 libsodium/libsodium-shorthash.wasm
 libsodium/libsodium-sign.wasm
 libsodium/libsodium-siphashx24.wasm
-libsodium/libsodium-sodium_core.wasm
 libsodium/libsodium-sodium_utils.wasm
-libsodium/libsodium-sodium_version.wasm
 libsodium/libsodium-stream.wasm
 libsodium/libsodium-stream2.wasm
 libsodium/libsodium-stream3.wasm
