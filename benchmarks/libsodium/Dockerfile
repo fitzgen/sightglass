@@ -42,9 +42,17 @@ RUN zig build -Dtarget=wasm32-wasi \
     -Doptimize=ReleaseFast -Dcpu=generic+bulk_memory+simd128 \
     -Denable_benchmarks=true -Diterations=1
 
-# Place all of the WebAssembly benchmarks in `/benchmark`. Some benchmarks lose
-# the `bench_end` import for some reason and are removed (TODO).
+# Place all of the WebAssembly benchmarks in `/benchmark`.
 WORKDIR /benchmark
 RUN cp /libsodium/zig-out/bin/*.wasm .
 RUN for f in *.wasm; do mv "$f" "libsodium-$f"; done
+
+# These benchmarks lose the `bench_end` import for some reason.
 RUN rm libsodium-sodium_utils2.wasm libsodium-sodium_utils3.wasm
+
+# These tests do no measurable work once compiled to Wasm -- their bodies are guarded by
+# host-feature checks that are false on Wasm, or are empty after preprocessing -- so they
+# measure nothing but harness overhead no matter how many iterations they run.
+RUN rm libsodium-aead_aes256gcm.wasm libsodium-aead_aes256gcm2.wasm \
+       libsodium-misuse.wasm libsodium-onetimeauth2.wasm \
+       libsodium-sodium_core.wasm libsodium-sodium_version.wasm
