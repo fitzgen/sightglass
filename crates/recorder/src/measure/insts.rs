@@ -35,12 +35,11 @@ use linux as imp;
 
 /// On macOS, user space cannot read the PMU instruction counter itself, so we
 /// instead ask the kernel for this process's retired-instruction count via
-/// `proc_pid_rusage`. The kernel maintains that count from the hardware
-/// performance monitor and exposes it without requiring sudo or enabling
-/// Apple's developer tools (which some corporate laptops disallow... on that
-/// corporation's developers' machines... yeah.)
+/// `proc_pid_rusage`.
 #[cfg(target_os = "macos")]
 mod macos {
+    use super::super::rusage;
+
     pub use u64 as State;
 
     pub fn new() -> State {
@@ -48,32 +47,11 @@ mod macos {
     }
 
     pub fn start(count: &mut State) {
-        *count = read_instructions_retired();
+        *count = rusage::read().ri_instructions;
     }
 
     pub fn end(initial_count: &mut State) -> u64 {
-        read_instructions_retired().wrapping_sub(*initial_count)
-    }
-
-    /// Read the number of instructions this process has retired so far.
-    fn read_instructions_retired() -> u64 {
-        // SAFETY: `rusage_info_v4` is a plain-old-data struct for which an
-        // all-zero bit pattern is valid, and we hand `proc_pid_rusage` a
-        // pointer to storage large enough for the `RUSAGE_INFO_V4` flavor we
-        // request.
-        let mut info: libc::rusage_info_v4 = unsafe { std::mem::zeroed() };
-        let ret = unsafe {
-            libc::proc_pid_rusage(
-                libc::getpid(),
-                libc::RUSAGE_INFO_V4,
-                &mut info as *mut libc::rusage_info_v4 as *mut libc::rusage_info_t,
-            )
-        };
-        assert_eq!(
-            ret, 0,
-            "proc_pid_rusage failed to read the retired-instruction count"
-        );
-        info.ri_instructions
+        rusage::read().ri_instructions.wrapping_sub(*initial_count)
     }
 }
 #[cfg(target_os = "macos")]

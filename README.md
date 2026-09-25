@@ -196,7 +196,10 @@ frequency changes, context switches, etc.).
 
 Several _measures_ can be configured using the `--measure` option:
 
-- `cycles`: The number of CPU cycles elapsed.
+- `cycles`: The number of CPU cycles elapsed. On macOS this is the kernel's
+  per-process count from the hardware performance monitor; elsewhere it is a
+  user-space counter such as `RDTSC`, which ticks at a constant rate rather than
+  at the core's actual clock speed.
 
 - `perf-counters`: A selection of common `perf` counters (CPU cycles,
   instructions retired, cache accesses, cache misses); only available on Linux.

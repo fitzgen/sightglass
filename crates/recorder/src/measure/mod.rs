@@ -88,6 +88,8 @@ pub mod callgrind;
 pub mod counters;
 #[cfg(any(target_os = "linux", target_os = "macos"))]
 pub mod insts;
+#[cfg(target_os = "macos")]
+mod rusage;
 
 pub mod cycles;
 pub mod multi;
